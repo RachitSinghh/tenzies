@@ -5,6 +5,7 @@ import Confetti from "react-confetti";
 
 export default function App() {
   const [dice, setDice] = useState(() => getRandomValue());
+  const [choseValue, setChooseValue] = useState(null);
   const buttonRef = useRef(null);
 
   const gameWon =
@@ -12,8 +13,8 @@ export default function App() {
     dice.every((die) => die.value === dice[0].value);
 
   useEffect(() => {
-    if(gameWon){
-      buttonRef.current.focus()
+    if (gameWon) {
+      buttonRef.current.focus();
     }
   }, [gameWon]);
 
@@ -26,11 +27,32 @@ export default function App() {
   }
 
   function holdDice(id) {
-    setDice((oldDice) =>
-      oldDice.map((die) =>
-        die.id === id ? { ...die, isHeld: !die.isHeld } : die,
-      ),
-    );
+    // oldDice.map((die) =>
+    //   die.id === id ? { ...die, isHeld: !die.isHeld } : die,
+    // ),
+    setDice((oldDice) => {
+      const target = oldDice.find((die) => die.id === id);
+      const nextChoosen = choseValue ?? target.value;
+
+      // Block if trying to build a different number
+
+      if (target.value !== nextChoosen) {
+        return oldDice.map((die) =>
+          die.id === id ? { ...die, shake: true } : die,
+        );
+      }
+
+      const updated = oldDice.map((die) =>
+        die.id === id ? { ...die, isHeld: !die.isHeld, shake: false } : die,
+      );
+
+      // if no dice remain held, clear chosenValue
+      const anyHeld = updated.some((die) => die.isHeld);
+      if (!anyHeld) setChooseValue(null);
+      else setChooseValue(nextChoosen);
+
+      return updated;
+    });
   }
   /*
     die.id === id => checks if the die.id is equal to input id
@@ -38,12 +60,20 @@ export default function App() {
     : die => this will simply return the value we have currently
   */
 
+  function clearShake(id) {
+    setDice((old) =>
+      old.map((die) => (die.id === id ? { ...die, shake: false } : die)),
+    );
+  }
+
   const diceElement = dice.map((num) => (
     <Die
       key={num.id}
       value={num.value}
       isHeld={num.isHeld}
       hold={() => holdDice(num.id)}
+      shake={num.shake}
+      clearShake={() => clearShake(num.id)}
     />
   ));
 

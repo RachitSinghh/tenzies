@@ -5,9 +5,10 @@ export default function Die(props) {
   return (
     <button
       style={styles}
+      className={props.shake ? "shake" : ""}
       onClick={props.hold}
-      aria-label={`Die with value ${props.value},
-              ${props.isHeld ? "held" : "not held"}`}
+      aria-label={`Die with value ${props.value}, ${props.isHeld ? "held" : "not held"}`}
+      onAnimationEnd={props.clearShake}
     >
       {props.value}
     </button>
