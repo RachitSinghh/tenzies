@@ -1,28 +1,23 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Die from "./Die";
 import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
-// import { useEffect } from "react";
 
 export default function App() {
   const [dice, setDice] = useState(() => getRandomValue());
-  // const {width, height} = useWindowSize()
-  //
-  // useEffect(() => {
-  //   const { width, height } = useWindowSize();
-  //   <Confetti width={width} height={height} />;
-  // },[dice]);
+  const buttonRef = useRef(null);
 
   const gameWon =
     dice.every((die) => die.isHeld) &&
     dice.every((die) => die.value === dice[0].value);
 
-  if (gameWon) {
-    console.log("Game won");
-  }
+  useEffect(() => {
+    if(gameWon){
+      buttonRef.current.focus()
+    }
+  }, [gameWon]);
 
   function getRandomValue() {
-    console.log("New dice generated");
     return new Array(10).fill(0).map(() => ({
       value: Math.ceil(Math.random() * 6),
       isHeld: false,
@@ -64,18 +59,18 @@ export default function App() {
     );
   }
 
-  function resetGame(){
-    setDice(getRandomValue)
+  function resetGame() {
+    setDice(getRandomValue);
   }
 
-  function startNewGame(){
-    if(gameWon){
-      resetGame()
-    }else{
-      rollTheDice()
+  function startNewGame() {
+    if (gameWon) {
+      resetGame();
+    } else {
+      rollTheDice();
     }
   }
-  
+
   return (
     <div className="container">
       {gameWon && gameWon && <Confetti />}
@@ -87,7 +82,7 @@ export default function App() {
         </p>
       </div>
       <div className="dice-Container">{diceElement}</div>
-      <button className="rollTheDice" onClick={startNewGame}>
+      <button ref={buttonRef} className="rollTheDice" onClick={startNewGame}>
         {gameWon ? "New Game" : "Roll"}
       </button>
     </div>
